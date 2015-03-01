@@ -11,15 +11,15 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
+Route::get('/', 'ProjectsController@index');
+Route::get('home', 'ProjectsController@index');
 
-/*Route::get('home', 'HomeController@index');
 
 Route::controllers([
 	'auth' => 'Auth\AuthController',
 	'password' => 'Auth\PasswordController',
 ]);
-*/
+
 
 // Provide controller methods with object instead of ID
 Route::model('tasks', 'Task');

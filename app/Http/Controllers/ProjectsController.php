@@ -1,5 +1,8 @@
 <?php namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Redirect;
+
 use App\Project;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
@@ -8,7 +11,12 @@ use Illuminate\Http\Request;
 
 class ProjectsController extends Controller {
 
-	/**
+    protected $rules = [
+        'name' => ['required', 'min:3'],
+        'slug' => ['required'],
+    ];
+
+    /**
 	 * Display a listing of the resource.
 	 *
 	 * @return Response
@@ -34,11 +42,18 @@ class ProjectsController extends Controller {
 	/**
 	 * Store a newly created resource in storage.
 	 *
-	 * @return Response
+	 * @param Request $request
+     * @return Response
 	 */
-	public function store()
+	public function store(Request $request)
 	{
 		//
+        $this->validate($request, $this->rules);
+
+        $input = Input::all();
+        Project::create($input);
+
+        return Redirect::route('projects.index')->with('message', 'Project created');
 	}
 
 	/**
@@ -69,12 +84,19 @@ class ProjectsController extends Controller {
 	 * Update the specified resource in storage.
 	 *
 	 * @param  Project $project
-	 * @return Response
+     * @param Request $request
+     * @return Response
 	 */
-	public function update(Project $project)
+	public function update(Project $project, Request $request)
 	{
 		//
-	}
+        $this->validate($request, $this->rules);
+
+        $input = array_except(Input::all(), '_method');
+        $project->update($input);
+
+        return Redirect::route('projects.show', $project->slug)->with('message', 'Project updated.');
+    }
 
 	/**
 	 * Remove the specified resource from storage.
@@ -85,6 +107,10 @@ class ProjectsController extends Controller {
 	public function destroy(Project $project)
 	{
 		//
-	}
+        $project->delete();
+
+        return Redirect::route('projects.index')->with('message', 'Project deleted.');
+
+    }
 
 }

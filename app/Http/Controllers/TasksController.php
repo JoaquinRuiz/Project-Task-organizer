@@ -5,11 +5,21 @@ use App\Project;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Redirect;
+
+use Illuminate\Support\Facades\Request;
+
 
 class TasksController extends Controller {
 
-	/**
+    protected $rules = [
+        'name' => ['required', 'min:3'],
+        'slug' => ['required'],
+        'description' => ['required'],
+    ];
+
+    /**
 	 * Display a listing of the resource.
 	 *
      * @param  Project $project
@@ -37,12 +47,22 @@ class TasksController extends Controller {
 	/**
 	 * Store a newly created resource in storage.
 	 *
-	 * @return Response
+     * @param  Project $project
+     * @param Request $request
+     * @return Response
 	 */
-	public function store()
+	public function store(Project $project, Request $request)
 	{
 		//
-	}
+        $this->validate($request, $this->rules);
+
+        $input = Input::all();
+        $input['project_id'] = $project->id;
+        Task::create( $input );
+
+        return Redirect::route('projects.show', $project->slug)->with('Task created.');
+
+    }
 
 	/**
 	 * Display the specified resource.
@@ -74,22 +94,35 @@ class TasksController extends Controller {
 	 * Update the specified resource in storage.
 	 *
 	 * @param  Task $task
-	 * @return Response
+     * @param  Project $project
+     * @param Request $request
+     * @return Response
 	 */
-	public function update(Task $task)
+	public function update(Project $project, Task $task, Request $request)
 	{
 		//
-	}
+        $this->validate($request, $this->rules);
+
+        $input = array_except(Input::all(), '_method');
+        $task->update($input);
+
+        return Redirect::route('projects.tasks.show', [$project->slug, $task->slug])->with('message', 'Task updated.');
+
+    }
 
 	/**
 	 * Remove the specified resource from storage.
 	 *
 	 * @param  Task $task
-	 * @return Response
+     * @param  Project $project
+     * @return Response
 	 */
-	public function destroy(Task $task)
+	public function destroy(Project $project, Task $task)
 	{
 		//
-	}
+        $task->delete();
+
+        return Redirect::route('projects.show', $project->slug)->with('message', 'Task deleted.');
+    }
 
 }
